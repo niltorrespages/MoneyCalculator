@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculation App</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-900 text-white">
+
+<div class="container mx-auto p-5">
+    <h1 class="text-3xl font-bold text-center mb-6">Calculation App</h1>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        <div class="bg-gray-800 p-5 rounded shadow-md mb-5">
+            <h2 class="text-xl font-semibold mb-2">Estalvis</h2>
+            <div class="flex items-center mb-4">
+                <label for="estalvisActuals" class="mr-2 w-1/2">Estalvis Actuals:</label>
+                <input type="text" id="estalvisActuals" value="10000" class="border rounded p-2 w-1/5 bg-gray-700">
+            </div>
+            <div class="flex items-center mb-4">
+                <label for="estalvisMensuals" class="mr-2 w-1/2">Estalvis Mensuals:</label>
+                <input type="text" id="estalvisMensuals" value="500" class="border rounded p-2 w-1/5 bg-gray-700">
+            </div>
+            <div class="flex items-center mb-4">
+                <label for="estalvisAnuals" class="mr-2 w-1/2">Estalvis Anuals addicionals:</label>
+                <input type="text" id="estalvisAnuals" value="1500" class="border rounded p-2 w-1/5 bg-gray-700">
+            </div>
+        </div>
+
+        <div class="bg-gray-800 p-5 rounded shadow-md mb-5">
+            <h2 class="text-xl font-semibold mb-2">Lloguer</h2>
+            <div class="flex items-center mb-4">
+                <label for="preuLloguerActual" class="mr-2 w-1/2">Preu Lloguer Actual:</label>
+                <input type="text" id="preuLloguerActual" value="750" class="border rounded p-2 w-1/5 bg-gray-700">
+            </div>
+            <div class="flex items-center mb-4">
+                <label for="incrementLloguerAnual" class="mr-2 w-1/2">Increment Lloguer Anual (%):</label>
+                <input type="text" id="incrementLloguerAnual" value="2" class="border rounded p-2 w-1/5 bg-gray-700">
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bg-gray-800 p-5 rounded shadow-md mb-5 0">
+        <h2 class="text-xl font-semibold mb-2">Casa</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- Left Column -->
+            <div>
+                <div class="flex items-center mb-4">
+                    <label for="preuCasa" class="mr-2 w-1/2">Preu Casa:</label>
+                    <input type="text" id="preuCasa" value="100000" class="border rounded p-2 w-1/5 bg-gray-700">
+                </div>
+
+                <div class="flex items-center mb-4">
+                    <label for="gastosCompra" class="mr-2 w-1/2">Gastos associats a compra:</label>
+                    <input type="text" id="gastosCompra" value="11000" class="border rounded p-2 w-1/5 bg-gray-700">
+                </div>
+
+                <div class="flex items-center mb-4">
+                    <label for="interesos" class="mr-2 w-1/2">Interesos (%):</label>
+                    <input type="text" id="interesos" value="3" class="border rounded p-2 w-1/5 bg-gray-700">
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <div class="flex items-center mb-4">
+                    <label for="anysHipoteca" class="mr-2 w-1/2">Anys Hipoteca:</label>
+                    <input type="text" id="anysHipoteca" value="30" class="border rounded p-2 w-1/5 bg-gray-700">
+                </div>
+
+                <div class="flex items-center mb-4">
+                    <label for="entradaNecessaria" class="mr-2 w-1/2">Entrada Necessaria:</label>
+                    <input type="text" id="entradaNecessaria" value="31000" class="border rounded p-2 w-1/5 bg-gray-700">
+                </div>
+
+                <button id="calculateBtn" class="bg-gray-700 text-white font-bold py-1 px-2 rounded hover:bg-gray-600 mt-4 w-full">
+                    Calculate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-800 p-5 rounded shadow-md mt-5" id="summarySection">
+        <h2 class="text-xl font-semibold mb-2">Summary</h2>
+        <div class="summary-output">
+            <p>Temps fins a compra: <span id="tempsFinsCompraValue">0</span></p>
+            <p>Total estalvis necessaris: <span id="totalEstalvisNecessarisValue">0</span></p>
+            <p>Total pagat per lloguer: <span id="totalPagatLloguerValue">0</span></p>
+            <p>Total pagat per hipoteca: <span id="totalPagatHipotecaValue">0</span></p>
+            <p>Total pagat: <span id="totalPagatValue">0</span></p>
+        </div>
+    </div>
+
+    <div class="bg-gray-800 p-5 rounded shadow-md mt-5" id="chartsSection">
+        <h2 class="text-xl font-semibold mb-2">Charts</h2>
+        <canvas id="myChart" width="400" height="200"></canvas>
+    </div>
+
+</div>
+
+<script>
+    document.getElementById('calculateBtn').addEventListener('click', function() {
+        const estalvisActuals = parseFloat(document.getElementById('estalvisActuals').value.replace(".", "")) || 0;
+        const estalvisMensuals = parseFloat(document.getElementById('estalvisMensuals').value.replace(".", "")) || 0;
+        const estalvisAnuals = parseFloat(document.getElementById('estalvisAnuals').value.replace(".", "")) || 0;
+        const preuLloguerActual = parseFloat(document.getElementById('preuLloguerActual').value.replace(".", "")) || 0;
+        const incrementLloguerAnual = parseFloat(document.getElementById('incrementLloguerAnual').value.replace(".", "")) || 0;
+        const preuCasa = parseFloat(document.getElementById('preuCasa').value.replace(".", "")) || 0;
+        const gastosCompra = parseFloat(document.getElementById('gastosCompra').value.replace(".", "")) || 0;
+        const interesos = parseFloat(document.getElementById('interesos').value.replace(".", "")) || 0;
+        const anysHipoteca = parseFloat(document.getElementById('anysHipoteca').value.replace(".", "")) || 0;
+        const entradaNecessaria = parseFloat(document.getElementById('entradaNecessaria').value.replace(".", "")) || 0;
+
+        var totalPagatLloguer = []
+        var totalPagatHipoteca = []
+        var totalPagat = []
+        var estalvis = []
+        var totalMesos = []
+
+        // Example calculations (you can modify as needed)
+        const totalIterations = 50 * 12
+        for (let i = 1; i < totalIterations; i++) {
+            var estalvi = estalvisActuals + i * estalvisMensuals
+            var costLloguer = 0
+            for (let j = 1; j <= i; j++) {
+                anys = Math.floor(j/12)
+                costLloguer = costLloguer + preuLloguerActual + (preuLloguerActual * incrementLloguerAnual/100 * anys)
+                if (j%12 === 0){
+                    estalvi = estalvi + estalvisAnuals
+                }
+            }
+
+            if (estalvi < entradaNecessaria) {
+                estalvis[i] = estalvi
+                totalPagatLloguer[i] = costLloguer
+                //totalPagatHipoteca[i] = 0
+                //totalPagat[i] = 0
+                continue
+            }
+
+            if (estalvi > preuCasa + gastosCompra){
+                break
+            }
+
+            var terminis = anysHipoteca * 12
+            var interesMensual = interesos / 12
+            var hipoteca = preuCasa + gastosCompra - estalvi
+
+
+            var quota = (hipoteca * interesMensual) / (100 * (1 - Math.pow((1+(interesMensual/100)), -terminis )))
+            var totalHipoteca = quota * terminis
+
+
+            estalvis[i] = estalvi
+            totalPagatLloguer[i] = Number(costLloguer.toFixed(2))
+            totalPagatHipoteca[i] = Number(totalHipoteca.toFixed(2))
+            totalPagat[i] = Number((costLloguer + totalHipoteca + estalvi).toFixed(2))
+
+            totalMesos[i] = i
+        }
+
+
+        best = 10000000
+        mes = 0
+        for (let i = 1; i < totalIterations; i++) {
+            if(totalPagat[i] < best && totalPagat[i] > 0){
+                mes = i
+                best = totalPagat[i]
+            }
+        }
+
+        // Update summary
+        document.getElementById('tempsFinsCompraValue').innerText = Math.floor(mes/12) + " anys " + mes%12 + " mesos, " + mes + " mesos totals";
+        document.getElementById('totalEstalvisNecessarisValue').innerText = estalvis[mes].toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+        document.getElementById('totalPagatLloguerValue').innerText = totalPagatLloguer[mes].toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+        document.getElementById('totalPagatHipotecaValue').innerText = totalPagatHipoteca[mes].toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+        document.getElementById('totalPagatValue').innerText = totalPagat[mes].toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+
+        // Update chart
+
+        const ctx = document.getElementById('myChart').getContext('2d');
+        let chartStatus = Chart.getChart("myChart"); // <canvas> id
+        if (chartStatus != undefined) {
+            chartStatus.destroy();
+        }
+
+        const lineMarker = {
+            id : 'lineMarker',
+            beforeDatasetsDraw: (chart, args, plugins) => {
+                const {ctx, chartArea: {top, bottom }, scales: {x}} = chart;
+                ctx.save();
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgb(253,53,96)';
+                ctx.lineWidth = 3;
+               // ctx.moveTo(x.getPixelForValue(0), x.getPixelForValue(totalPagat[mes]));
+               // ctx.lineTo(x.getPixelForValue(totalMesos.length), x.getPixelForValue(totalPagat[mes]));
+                ctx.moveTo(x.getPixelForValue(mes), top);
+                ctx.lineTo(x.getPixelForValue(mes), bottom);
+                ctx.stroke();
+            }
+        }
+
+        Chart.defaults.elements.point.pointStyle = false
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: totalMesos,
+                datasets: [{
+                    label: 'Total Pagat',
+                    data: totalPagat,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Total Hipoteca',
+                    data: totalPagatHipoteca,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Total Lloguer',
+                    data: totalPagatLloguer,
+                    backgroundColor: 'rgba(255, 206, 86, 1)',
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Estalvis',
+                    data: estalvis,
+                    backgroundColor: 'rgba(153, 102, 255, 1)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                },
+                ]
+            },
+            plugins: [lineMarker]
+        });
+    });
+</script>
+<script>
+    function formatNumberWithDots(value) {
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function handleNumberInput(event) {
+        const inputField = event.target;
+        const cleanValue = inputField.value.replace(/\./g, ''); // Remove existing dots
+        if (!isNaN(cleanValue)) {
+            inputField.value = formatNumberWithDots(cleanValue); // Format with dots
+        }
+    }
+
+    document.querySelectorAll('input[type="text"]').forEach(input => {
+        input.addEventListener('input', handleNumberInput);
+        input.addEventListener('blur', handleNumberInput); // Format on blur too
+    });
+</script>
+<script>
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Select all input fields and format their values
+        const inputFields = [
+            'estalvisActuals',
+            'estalvisMensuals',
+            'preuLloguerActual',
+            'incrementLloguerAnual',
+            'preuCasa',
+            'gastosCompra',
+            'interesos',
+            'anysHipoteca',
+            'entradaNecessaria'
+        ];
+
+        inputFields.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                const value = parseFloat(input.value.replace('.', '').replace(',', '.')) || 0; // Normalize the value
+                input.value = formatNumber(value);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
